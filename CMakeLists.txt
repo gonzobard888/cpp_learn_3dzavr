@@ -94,17 +94,25 @@ add_executable(${CMAKE_PROJECT_NAME}
 if(APPLE OR UNIX)
     include_directories(/usr/local/include)
 else()
-    set(SFML_DIR "C:/Libraries/SFML/lib/cmake/SFML")
-    set(SFML_STATIC_LIBRARIES TRUE)
+    set(SFML_DIR "D:/delete_me/SFML/lib/cmake/SFML")
+#    set(SFML_STATIC_LIBRARIES TRUE)
 endif()
 
-find_package(SFML 2.5.1 COMPONENTS graphics audio REQUIRED)
+find_package(SFML 3.0.2 COMPONENTS Graphics Audio Network Window System)
 
-if (SFML_FOUND)
-    include_directories(${SFML_INCLUDE_DIR})
-endif()
+target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE
+        SFML::Graphics
+        SFML::Audio
+        SFML::Network
+        SFML::Window
+        SFML::System
+)
 
-target_link_libraries(${CMAKE_PROJECT_NAME} sfml-audio sfml-network sfml-graphics sfml-window sfml-system)
+#if (SFML_FOUND)
+#    include_directories(${SFML_INCLUDE_DIR})
+#endif()
+#
+#target_link_libraries(${CMAKE_PROJECT_NAME} sfml-audio sfml-network sfml-graphics sfml-window sfml-system)
 
 # OpenGL part
 if (APPLE)

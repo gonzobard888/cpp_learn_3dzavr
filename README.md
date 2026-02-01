@@ -1,3 +1,5 @@
+![SFML 3.0.2](./doc/SFML_302.png)
+
 # Материалы для курса vectozavr.ru
 
 Сам курс: [vectozavr.ru](https://vectozavr.ru)
