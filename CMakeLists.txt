@@ -89,30 +89,61 @@ add_executable(${CMAKE_PROJECT_NAME}
         engine/network/UDPConnection.h
         engine/network/UDPSocket.cpp
         engine/network/UDPSocket.h
-        )
+)
 
 if(APPLE OR UNIX)
     include_directories(/usr/local/include)
 else()
     set(SFML_DIR "D:/delete_me/SFML/lib/cmake/SFML")
-#    set(SFML_STATIC_LIBRARIES TRUE)
+    set(SFML_STATIC_LIBRARIES TRUE)
 endif()
 
-find_package(SFML 3.0.2 COMPONENTS Graphics Audio Network Window System)
 
-target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE
-        SFML::Graphics
-        SFML::Audio
-        SFML::Network
-        SFML::Window
-        SFML::System
-)
+# --- OpenAL ---
+if(WIN32)
+    set(OPENAL_INCLUDE_DIR "d:/delete_me/OpenAL/include")
+    set(OPENAL_LIBRARY     "d:/delete_me/OpenAL/libs/Win64/OpenAL32.lib")
+endif()
 
-#if (SFML_FOUND)
-#    include_directories(${SFML_INCLUDE_DIR})
-#endif()
-#
-#target_link_libraries(${CMAKE_PROJECT_NAME} sfml-audio sfml-network sfml-graphics sfml-window sfml-system)
+find_package(OpenAL REQUIRED)
+
+# SFML ожидает TARGET OpenAL (НЕ ALIAS!)
+# Создаем реальный IMPORTED target OpenAL, на который set_property можно делать.
+if(NOT TARGET OpenAL)
+    add_library(OpenAL UNKNOWN IMPORTED)
+endif()
+
+# Подставим location/include:
+# 1) если FindOpenAL выставил переменные — используем их
+if(DEFINED OPENAL_LIBRARY)
+    set_target_properties(OpenAL PROPERTIES
+            IMPORTED_LOCATION "${OPENAL_LIBRARY}"
+    )
+endif()
+
+if(DEFINED OPENAL_INCLUDE_DIR)
+    set_target_properties(OpenAL PROPERTIES
+            INTERFACE_INCLUDE_DIRECTORIES "${OPENAL_INCLUDE_DIR}"
+    )
+endif()
+
+# 2) если FindOpenAL создал OpenAL::OpenAL — "приклеим" его к нашему OpenAL
+# (через INTERFACE_LINK_LIBRARIES), но НЕ через ALIAS.
+if(TARGET OpenAL::OpenAL)
+    set_property(TARGET OpenAL APPEND PROPERTY
+            INTERFACE_LINK_LIBRARIES OpenAL::OpenAL
+    )
+endif()
+
+
+
+find_package(SFML 2.6.2 COMPONENTS graphics audio REQUIRED)
+
+if (SFML_FOUND)
+    include_directories(${SFML_INCLUDE_DIR})
+endif()
+
+target_link_libraries(${CMAKE_PROJECT_NAME} sfml-audio sfml-network sfml-graphics sfml-window sfml-system)
 
 # OpenGL part
 if (APPLE)
